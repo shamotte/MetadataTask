@@ -1,5 +1,6 @@
 ﻿using FivetranClient;
 using Import.Helpers.Fivetran;
+using System.Text;
 
 namespace Import.ConnectionSupport;
 
@@ -65,15 +66,16 @@ public class FivetranConnectionSupport : IConnectionSupport
         }
 
         // bufforing for performance
-        var consoleOutputBuffer = "";
-        consoleOutputBuffer += "Available groups in Fivetran account:\n";
+        StringBuilder consoleOutputBuffer = new StringBuilder();
+        consoleOutputBuffer.Append("Available groups in Fivetran account:\n");
         var elementIndex = 1;
         foreach (var group in groups)
         {
-            consoleOutputBuffer += $"{elementIndex++}. {group.Name} (ID: {group.Id})\n";
+            consoleOutputBuffer.Append( $"{elementIndex++}. {group.Name} (ID: {group.Id})\n");
         }
-        consoleOutputBuffer += "Please select a group to import from (by number): ";
-        Console.Write(consoleOutputBuffer);
+        consoleOutputBuffer.Append("Please select a group to import from (by number): ");
+
+        Console.Write(consoleOutputBuffer.ToString());
         var input = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(input)
             || !int.TryParse(input, out var selectedIndex)
