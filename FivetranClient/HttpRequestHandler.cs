@@ -42,35 +42,40 @@ public class HttpRequestHandler
             await this._semaphore.WaitAsync(cancellationToken);
         }
 
-        TimeSpan timeToWait;
-        lock (this._lock)
+        try
         {
-            timeToWait = this._retryAfterTime - DateTime.UtcNow;
-        }
-
-        if (timeToWait > TimeSpan.Zero)
-        {
-            await Task.Delay(timeToWait, cancellationToken);
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var response = await this._client.GetAsync(new Uri(url, UriKind.Relative), cancellationToken);
-        response.EnsureSuccessStatusCode();
-        if (response.StatusCode is HttpStatusCode.TooManyRequests)
-        {
-            var retryAfter = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(60);
-
+            TimeSpan timeToWait;
             lock (this._lock)
             {
-                this._retryAfterTime = DateTime.UtcNow.Add(retryAfter);
+                timeToWait = this._retryAfterTime - DateTime.UtcNow;
             }
 
-            // new request will wait for the specified time before retrying
-            return await this._GetAsync(url, cancellationToken);
-        }
+            if (timeToWait > TimeSpan.Zero)
+            {
+                await Task.Delay(timeToWait, cancellationToken);
+            }
 
-        this._semaphore?.Release();
-        return response;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var response = await this._client.GetAsync(new Uri(url, UriKind.Relative), cancellationToken);
+            response.EnsureSuccessStatusCode();
+            if (response.StatusCode is HttpStatusCode.TooManyRequests)
+            {
+                var retryAfter = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(60);
+
+                lock (this._lock)
+                {
+                    this._retryAfterTime = DateTime.UtcNow.Add(retryAfter);
+                }
+
+                // new request will wait for the specified time before retrying
+                return await this._GetAsync(url, cancellationToken);
+            }
+            return response;
+        }
+        finally
+        {
+            this._semaphore?.Release();
+        }
     }
 }
