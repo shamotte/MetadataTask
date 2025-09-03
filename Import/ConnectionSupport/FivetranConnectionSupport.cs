@@ -107,7 +107,8 @@ public class FivetranConnectionSupport : IConnectionSupport
             throw new Exception("No connectors found in the selected group.");
         }
 
-        var allMappingsBuffer = "Lineage mappings:\n";
+        StringBuilder allMappingsBuffer = new();
+        allMappingsBuffer.Append( "Lineage mappings:\n");
         Parallel.ForEach(connectors, connector =>
         {
             var connectorSchemas = restApiManager
@@ -118,11 +119,11 @@ public class FivetranConnectionSupport : IConnectionSupport
             {
                 foreach (var table in schema.Value?.Tables ?? [])
                 {
-                    allMappingsBuffer += $"  {connector.Id}: {schema.Key}.{table.Key} -> {schema.Value?.NameInDestination}.{table.Value.NameInDestination}\n";
+                    allMappingsBuffer.Append( $"  {connector.Id}: {schema.Key}.{table.Key} -> {schema.Value?.NameInDestination}.{table.Value.NameInDestination}\n");
                 }
             }
         });
 
-        Console.WriteLine(allMappingsBuffer);
+        Console.WriteLine(allMappingsBuffer.ToString());
     }
 }
