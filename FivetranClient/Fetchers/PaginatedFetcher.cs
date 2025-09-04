@@ -41,6 +41,7 @@ public sealed class PaginatedFetcher(HttpRequestHandler requestHandler) : BaseFe
         if (!string.IsNullOrWhiteSpace(nextCursor))
         {
             // fire and forget (await after yielding current items)
+            //this is not fire and forget - we are not awaiting the task now, but instead it is awaited somwhere in the future, making it more of a prefetch rather than fire and forget
             var nextTask = this.FetchPageAsync<T>(endpoint, cancellationToken, nextCursor);
             nextResults = this.ProcessPagesRecursivelyAsync(endpoint, nextTask, cancellationToken);
         }
