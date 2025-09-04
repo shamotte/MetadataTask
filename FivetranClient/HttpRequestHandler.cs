@@ -71,7 +71,6 @@ public class HttpRequestHandler
             cancellationToken.ThrowIfCancellationRequested();
 
             var response = await this._client.GetAsync(new Uri(url, UriKind.Relative), cancellationToken);
-            response.EnsureSuccessStatusCode();
             if (response.StatusCode is HttpStatusCode.TooManyRequests)
             {
                 var retryAfter = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(60);
@@ -83,6 +82,10 @@ public class HttpRequestHandler
 
                 // new request will wait for the specified time before retrying
                 return await this._GetAsync(url, cancellationToken);
+            }
+            else
+            {
+                response.EnsureSuccessStatusCode();
             }
             return response;
         
