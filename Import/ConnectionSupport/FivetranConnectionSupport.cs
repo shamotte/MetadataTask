@@ -10,7 +10,7 @@ public class FivetranConnectionSupport : IConnectionSupport
     public const string ConnectorTypeCode = "FIVETRAN";
     private record FivetranConnectionDetailsForSelection(string ApiKey, string ApiSecret);
 
-    public object? GetConnectionDetailsForSelection()
+    public object GetConnectionDetailsForSelection()
     {
         Console.Write("Provide your Fivetran API Key: ");
         var apiKey = Console.ReadLine() ?? throw new ArgumentNullException();
