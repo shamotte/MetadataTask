@@ -8,7 +8,7 @@ public class TtlDictionary<TKey, TValue> where TKey : notnull
 
     private SemaphoreSlim _semaphore = new SemaphoreSlim(1,1);
 
-    public async Task<TValue> GetOrAdd(TKey key, Func<TValue> valueFactory, TimeSpan ttl)
+    public async ValueTask<TValue> GetOrAdd(TKey key, Func<TValue> valueFactory, TimeSpan ttl)
     {
         await _semaphore.WaitAsync();
 
