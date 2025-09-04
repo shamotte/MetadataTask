@@ -29,7 +29,7 @@ public class HttpRequestHandler
 
     public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken)
     {
-        return _responseCache.GetOrAdd(
+        return await _responseCache.GetOrAdd(
             url,
             () => this._GetAsyncAcquireSemaphore(url, cancellationToken).Result,
             TimeSpan.FromMinutes(60));
